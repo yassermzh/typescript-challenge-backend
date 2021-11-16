@@ -44,6 +44,28 @@ export class LineService {
   addStop(lineId: string, stop: TransitStop, reference: string, position: 'before' | 'after' = 'after'): void {
     // TODO
   }
+
+  /**
+   * Delete a stop from a line
+   * @param lineId Id of the line
+   * @param stopId Id of the stop to delete
+   */
+  deleteStop(lineId: string, stopId: string) {
+    const line = this.lines[lineId]
+    const stopIndex = line.findIndex((stop) => stop.stopId === stopId)
+    const currentStop = line[stopIndex]
+    const nextStop = line.find((stop) => stop.stopId === currentStop.nextStopId)
+    const prevStop = line.find((stop) => stop.stopId === currentStop.prevStopId)
+    if (nextStop) {
+      nextStop.prevStopId = prevStop ? prevStop.stopId : null
+    }
+    if (prevStop) {
+      prevStop.nextStopId = nextStop ? nextStop.stopId : null
+    }
+    const newLine = [...line.slice(0, stopIndex), ...line.slice(stopIndex + 1)]
+    this.lines[lineId] = newLine
+    return this.getLine(lineId)
+  }
 }
 
 export const lineService = new LineService()
